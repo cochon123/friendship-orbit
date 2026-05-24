@@ -1,36 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Friendship Orbit – Next.js + SQLite
 
-## Getting Started
+The original standalone mock lives in `legacy/` (`index.html` + `script-complete.js`). Everything else is a **Next.js 16 App Router** app with **SQLite** via `better-sqlite3`.
 
-First, run the development server:
+### Routes
+
+| Path | Purpose |
+|------|---------|
+| `/` | redirects to `/orbit` |
+| `/orbit` | Draggable orbit, add friends, user avatar upload |
+| `/friends` | List + edit modal |
+| `/analytics`, `/timeline`, `/insights`, `/compare` | Same conceptual tabs as the mock |
+| `/groups` | Constellations (`groups` + `group_members` tables) |
+
+JSON API:`/api/app`, `/api/friends`, `/api/friends/[id]`, `/api/friends/[id]/orbit`, `/api/profile`, `/api/groups`, `/api/groups/[id]`, `/api/export`, `/api/reset`.
+
+### Database
+
+- First run (empty DB) seeds **demo friends**, **timeline history**, and **three constellation groups**. Delete `data/friendship-orbit.db` to re-seed after `npm run dev`.
+- Custom path:`DATABASE_PATH=/abs/path.sqlite npm run dev`
+
+### Scripts
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run build
+npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+After `npm install`, `postinstall` runs `npm rebuild better-sqlite3` so the native addon matches your **current** Node.js ABI. If you upgrade Node and see `NODE_MODULE_VERSION` / `ERR_DLOPEN_FAILED`, run:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm rebuild better-sqlite3
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Deploy notes
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+SQLite is filesystem-local — use a writable volume / persistent disk on your host or pick another store for serverless multi-instance setups.

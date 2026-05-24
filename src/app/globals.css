@@ -1,26 +1,247 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --fo-bg: #080d1a;
+  --fo-text: #e6eef8;
+  --fo-text-muted: #7a95be;
+  --fo-accent: #7b61ff;
+  --fo-accent-2: #5ce1e6;
+  --fo-border: rgba(255, 255, 255, 0.07);
+  --fo-success: #6fe6a8;
+  --fo-warning: #ffd166;
+  --fo-danger: #ff6ea6;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: "Inter", system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  background: var(--fo-bg);
+  color: var(--fo-text);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+@keyframes fo-twinkle {
+  0%,
+  100% {
+    opacity: 0.08;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.6);
+  }
+}
+
+@keyframes fo-shoot {
+  0% {
+    opacity: 0;
+    transform: translateX(0) rotate(-20deg);
+  }
+  5% {
+    opacity: 1;
+  }
+  40% {
+    opacity: 0;
+    transform: translateX(60vw) rotate(-20deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(60vw) rotate(-20deg);
+  }
+}
+
+@keyframes fo-spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fo-planet-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+@keyframes fo-modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes fo-star-pop {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.fo-star {
+  position: absolute;
+  border-radius: 999px;
+  background: #fff;
+  animation: fo-twinkle var(--dur, 3s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.fo-shooting-star {
+  position: absolute;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.9), transparent);
+  animation: fo-shoot var(--sdur, 8s) ease-in infinite;
+  animation-delay: var(--sdelay, 0s);
+  opacity: 0;
+  transform-origin: left center;
+}
+
+/* Stroke width is set in TS; light opacity kept so dashed rings stay soft. */
+#orbit-svg .orbit-ring {
+  opacity: 0.55;
+}
+
+#orbit-svg #orbit-rings {
+  animation: fo-spin-slow 60s linear infinite;
+  transform-origin: 400px 400px;
+}
+
+#orbit-svg #center-planet {
+  animation: fo-planet-float 7s ease-in-out infinite;
+}
+
+.friend-star-group {
+  animation: fo-star-pop 0.4s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+#orbit-svg.dragging {
+  cursor: grabbing !important;
+}
+
+#orbit-svg.dragging .friend-star-group {
+  cursor: grabbing;
+}
+
+.fo-tab-active {
+  background: linear-gradient(135deg, var(--fo-accent), var(--fo-accent-2));
+  box-shadow: 0 8px 30px rgba(123, 97, 255, 0.4);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.fo-orbit-shell {
+  min-height: 560px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 50%, rgba(123, 97, 255, 0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 100% 80% at 10% 10%, rgba(92, 225, 230, 0.03) 0%, transparent 50%),
+    rgba(255, 255, 255, 0.015);
+}
+
+.fo-drag-hint {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--fo-text-muted);
+  padding: 6px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+.fo-progress-track {
+  margin-top: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.fo-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--fo-accent), var(--fo-accent-2));
+  transition: width 0.6s cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+.fo-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 8, 20, 0.75);
+  backdrop-filter: blur(4px);
+}
+
+.fo-modal.fo-modal-open {
+  display: flex;
+}
+
+.fo-modal-panel {
+  width: 680px;
+  max-width: 92%;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 16px;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(20, 25, 50, 0.98), rgba(12, 16, 35, 0.98));
+  border: 1px solid rgba(123, 97, 255, 0.2);
+  animation: fo-modal-in 260ms cubic-bezier(0.2, 0.9, 0.2, 1);
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.fo-toast {
+  position: fixed;
+  bottom: 22px;
+  right: 22px;
+  z-index: 2000;
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 260ms cubic-bezier(0.2, 0.9, 0.2, 1),
+    transform 260ms cubic-bezier(0.2, 0.9, 0.2, 1);
+  background: linear-gradient(135deg, rgba(20, 25, 50, 0.95), rgba(12, 16, 35, 0.95));
+  border: 1px solid rgba(123, 97, 255, 0.25);
+  color: var(--fo-text);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.fo-toast-visible {
+  opacity: 1;
+  transform: translateY(0);
 }

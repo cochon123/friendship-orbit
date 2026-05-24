@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Friendship Orbit - Complete Edition</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #080d1a;
+      --panel: rgba(255,255,255,0.03);
+      --card: rgba(255,255,255,0.035);
+      --glass: rgba(255,255,255,0.05);
+      --text: #e6eef8;
+      --text-secondary: #7a95be;
+      --muted: rgba(159,180,214,0.12);
+      --accent: #7b61ff;
+      --accent-2: #5ce1e6;
+      --accent-glow: 0 8px 30px rgba(123,97,255,0.4);
+      --border: rgba(255,255,255,0.07);
+      --success: #6fe6a8;
+      --warning: #ffd166;
+      --danger: #ff6ea6;
+    }
+
+    body {
+      font-family: "Inter", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Starfield ── */
+    #starfield {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: #fff;
+      animation: twinkle var(--dur) ease-in-out infinite;
+      animation-delay: var(--delay);
+    }
+    @keyframes twinkle {
+      0%,100% { opacity: 0.08; transform: scale(1); }
+      50% { opacity: 0.75; transform: scale(1.6); }
+    }
+    .shooting-star {
+      position: absolute;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.9), transparent);
+      animation: shoot var(--sdur) ease-in infinite;
+      animation-delay: var(--sdelay);
+      opacity: 0;
+      transform-origin: left center;
+    }
+    @keyframes shoot {
+      0%   { opacity: 0; transform: translateX(0) rotate(-20deg); }
+      5%   { opacity: 1; }
+      40%  { opacity: 0; transform: translateX(60vw) rotate(-20deg); }
+      100% { opacity: 0; transform: translateX(60vw) rotate(-20deg); }
+    }
+
+    /* ── Layout ── */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1400px;
+      margin: 24px auto;
+      padding: 24px;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, rgba(123,97,255,0.12), rgba(92,225,230,0.06));
+      border: 1px solid rgba(123,97,255,0.25);
+      padding: 18px 22px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 16px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+      animation: headerPulse 8s ease-in-out infinite;
+    }
+    @keyframes headerPulse {
+      0%,100% { box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 rgba(123,97,255,0); }
+      50%      { box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 40px rgba(123,97,255,0.12); }
+    }
+    h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; }
+    .header-subtitle { color: var(--text-secondary); margin: 4px 0 0; font-size: 13px; }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      align-items: center;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 6px;
+      backdrop-filter: blur(8px);
+    }
+    .tab-btn {
+      padding: 9px 16px;
+      background: none;
+      border: 1px solid transparent;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      border-radius: 10px;
+      transition: all 200ms cubic-bezier(.2,.9,.2,1);
+      white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.04); transform: translateY(-1px); }
+    .tab-btn.active {
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: var(--accent-glow);
+      border-color: rgba(255,255,255,0.08);
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 280ms ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── Cards ── */
+    .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; margin-bottom: 20px; }
+    .card {
+      background: linear-gradient(135deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02));
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      transition: transform 280ms cubic-bezier(.2,.9,.2,1), box-shadow 280ms;
+      backdrop-filter: blur(6px);
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(123,97,255,0.12);
+    }
+    .card h3 { margin-bottom: 14px; font-size: 15px; font-weight: 700; }
+
+    .stat-box {
+      background: linear-gradient(135deg, rgba(123,97,255,0.1), rgba(92,225,230,0.04));
+      padding: 13px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      border: 1px solid rgba(123,97,255,0.1);
+    }
+    .stat-value { font-size: 24px; font-weight: 800; color: #fff; }
+    .stat-label { font-size: 12px; color: var(--text-secondary); }
+
+    /* ── Buttons ── */
+    .btn {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      transition: transform 160ms, box-shadow 160ms, filter 160ms;
+      font-family: inherit;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #fff;
+      box-shadow: var(--accent-glow);
+    }
+    .btn-primary:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 12px 32px rgba(123,97,255,0.5); }
+    .btn-secondary { background: rgba(255,255,255,0.06); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: rgba(255,255,255,0.1); transform: translateY(-1px); }
+    .btn-danger { background: linear-gradient(135deg, #ff6ea6, #ff3b7a); color: #fff; }
+    .btn-danger:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+    /* ── Forms ── */
+    form { display: grid; gap: 10px; }
+    label { display: flex; flex-direction: column; font-size: 12px; font-weight: 600; color: var(--text-secondary); letter-spacing: 0.03em; text-transform: uppercase; }
+    input, select, textarea {
+      margin-top: 6px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      transition: border-color 180ms, background 180ms;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: rgba(123,97,255,0.5);
+      background: rgba(123,97,255,0.06);
+    }
+    input[type="range"] { padding: 0; background: transparent; border: none; cursor: pointer; }
+    select option { background: #1a1f35; }
+    textarea { min-height: 80px; resize: vertical; }
+    .range-value { font-size: 11px; color: var(--accent-2); font-weight: 700; margin-top: 2px; }
+
+    /* ── Avatar Upload ── */
+    .avatar-upload-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 6px;
+    }
+    .avatar-circle {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(123,97,255,0.3), rgba(92,225,230,0.2));
+      border: 2px dashed rgba(123,97,255,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      cursor: pointer;
+      overflow: hidden;
+      transition: border-color 200ms, transform 200ms;
+      flex-shrink: 0;
+    }
+    .avatar-circle:hover { border-color: var(--accent); transform: scale(1.05); }
+    .avatar-circle img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .avatar-upload-hint { font-size: 11px; color: var(--text-secondary); line-height: 1.4; }
+
+    /* ── Orbit ── */
+    .orbit {
+      width: 100%;
+      min-height: 560px;
+      background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(123,97,255,0.06) 0%, transparent 70%),
+                  radial-gradient(ellipse 100% 80% at 10% 10%, rgba(92,225,230,0.03) 0%, transparent 50%),
+                  rgba(255,255,255,0.015);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+    }
+    svg { width: 100%; height: 100%; display: block; }
+
+    /* SVG animations */
+    #orbit-svg #orbit-rings {
+      transform-box: fill-box;
+      transform-origin: 50% 50%;
+      animation: spinSlow 60s linear infinite;
+    }
+    #orbit-svg .orbit-ring { opacity: 0.18; }
+    #orbit-svg #center-planet {
+      animation: planetFloat 7s ease-in-out infinite;
+    }
+    .friend-star-group {
+      animation: starPop 0.4s cubic-bezier(.2,1.4,.4,1) both;
+    }
+    @keyframes spinSlow  { from { transform: rotate(0deg); }   to { transform: rotate(360deg); } }
+    @keyframes planetFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+    @keyframes starPop { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: scale(1); } }
+
+    /* ── List ── */
+    .list { display: flex; flex-direction: column; gap: 6px; }
+    .list-item {
+      padding: 11px 13px;
+      background: rgba(255,255,255,0.025);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 180ms;
+      border: 1px solid transparent;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .list-item:hover { background: rgba(255,255,255,0.05); transform: translateX(4px); }
+    .list-item.selected {
+      background: linear-gradient(135deg, rgba(123,97,255,0.2), rgba(92,225,230,0.1));
+      border-color: rgba(123,97,255,0.3);
+      color: #fff;
+    }
+    .list-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: #fff;
+      flex-shrink: 0; overflow: hidden;
+    }
+    .list-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* ── Health Badges ── */
+    .health-badge { display: inline-block; padding: 5px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .health-balanced { background: rgba(111,230,168,0.12); color: var(--success); border: 1px solid rgba(111,230,168,0.2); }
+    .health-onesided  { background: rgba(255,209,102,0.08); color: var(--warning); border: 1px solid rgba(255,209,102,0.15); }
+    .health-growing   { background: rgba(92,225,230,0.08);  color: var(--accent-2); border: 1px solid rgba(92,225,230,0.15); }
+    .health-drifting  { background: rgba(255,110,166,0.06); color: var(--danger); border: 1px solid rgba(255,110,166,0.12); }
+
+    /* ── Timeline ── */
+    .timeline-item { padding: 12px; border-left: 3px solid rgba(123,97,255,0.25); margin-bottom: 10px; background: rgba(255,255,255,0.015); border-radius: 8px; }
+    .timeline-date { font-size: 11px; color: var(--text-secondary); margin-bottom: 5px; }
+
+    .blind-spot-warning { background: rgba(255,209,102,0.06); border-left: 3px solid var(--warning); padding: 12px; border-radius: 8px; font-size: 13px; margin-bottom: 8px; }
+    .insight-box { background: linear-gradient(135deg, rgba(123,97,255,0.07), rgba(92,225,230,0.03)); padding: 12px; border-radius: 10px; margin-bottom: 10px; font-size: 13px; border: 1px solid rgba(123,97,255,0.08); }
+
+    /* ── Modal ── */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(5,8,20,0.75); z-index: 1200; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+    .modal.active { display: flex; }
+    .modal-content {
+      background: linear-gradient(135deg, rgba(20,25,50,0.98), rgba(12,16,35,0.98));
+      border: 1px solid rgba(123,97,255,0.2);
+      border-radius: 16px;
+      padding: 24px;
+      width: 680px;
+      max-width: 92%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04);
+      animation: modalIn 260ms cubic-bezier(.2,.9,.2,1);
+    }
+    @keyframes modalIn { from { opacity: 0; transform: scale(0.94) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .modal-close { background: rgba(255,255,255,0.07); border: 1px solid var(--border); color: var(--text); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: background 160ms; }
+    .modal-close:hover { background: rgba(255,110,166,0.2); color: var(--danger); }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 22px; right: 22px;
+      background: linear-gradient(135deg, rgba(20,25,50,0.95), rgba(12,16,35,0.95));
+      border: 1px solid rgba(123,97,255,0.25);
+      color: var(--text);
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 260ms cubic-bezier(.2,.9,.2,1);
+      z-index: 2000;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+
+    /* ── Progress bar (for closeness/importance display) ── */
+    .progress-bar-track { background: rgba(255,255,255,0.06); border-radius: 999px; height: 6px; margin-top: 6px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width 600ms cubic-bezier(.2,.9,.2,1); }
+
+    /* ── Constellation Groups ── */
+    .groups-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 18px;
+    }
+    .group-card {
+      background: linear-gradient(135deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02));
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      transition: transform 280ms cubic-bezier(.2,.9,.2,1), box-shadow 280ms;
+      border-left-width: 4px !important;
+    }
+    .group-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.45); }
+
+    .icon-picker-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+    .icon-btn {
+      width: 42px; height: 42px;
+      border: 2px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      background: rgba(255,255,255,0.04);
+      font-size: 19px;
+      cursor: pointer;
+      transition: all 180ms;
+      display: flex; align-items: center; justify-content: center;
+      font-family: inherit;
+    }
+    .icon-btn:hover  { border-color: var(--accent); background: rgba(123,97,255,0.12); transform: scale(1.08); }
+    .icon-btn.active { border-color: var(--accent); background: rgba(123,97,255,0.22); transform: scale(1.08); box-shadow: 0 0 12px rgba(123,97,255,0.35); }
+
+    .color-picker-row { display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+    .color-btn {
+      width: 30px; height: 30px;
+      border: 3px solid transparent;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 180ms;
+      outline: none;
+    }
+    .color-btn:hover  { transform: scale(1.18); }
+    .color-btn.active { border-color: white; transform: scale(1.18); box-shadow: 0 0 10px rgba(255,255,255,0.4); }
+
+    .members-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; max-height: 190px; overflow-y: auto; padding-right: 2px; }
+    .member-check-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 10px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px; cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 160ms; font-size: 13px;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .member-check-row:hover  { background: rgba(255,255,255,0.06); border-color: var(--border); }
+    .member-check-row.active { background: rgba(123,97,255,0.14); border-color: rgba(123,97,255,0.35); }
+    .member-check-row input[type="checkbox"] { accent-color: var(--accent); width: 15px; height: 15px; flex-shrink: 0; }
+
+    .group-detail-member { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: rgba(255,255,255,0.025); border-radius: 10px; border: 1px solid var(--border); margin-bottom: 6px; }
+
+    /* ── Drag ── */
+    #orbit-svg .friend-star-group { cursor: grab; }
+    #orbit-svg.dragging            { cursor: grabbing !important; }
+    #orbit-svg.dragging .friend-star-group { cursor: grabbing; }
+
+    /* ── Status badges ── */
+    .status-toxic  { background: rgba(255,60,0,0.12);  color: #ff6030; border: 1px solid rgba(255,60,0,0.2);  border-radius: 999px; padding: 3px 8px; font-size: 11px; font-weight: 700; }
+    .status-cutoff { background: rgba(120,80,255,0.12); color: #a070ff; border: 1px solid rgba(120,80,255,0.2); border-radius: 999px; padding: 3px 8px; font-size: 11px; font-weight: 700; }
+
+    /* ── Drag hint bar ── */
+    .drag-hint { font-size: 11px; color: var(--text-secondary); text-align: center; padding: 6px; margin-top: 8px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px; }
+
+    @media (max-width: 1024px) { .grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: 1fr; }
+      .tab-btn { padding: 7px 10px; font-size: 11px; }
+      .modal-content { width: 92%; }
+    }
+  </style>
+</head>
+<body>
+  <div id="starfield"></div>
+  <input type="file" id="user-avatar" accept="image/*" style="display:none" />
+
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div>
+        <h1>🌌 Friendship Orbit</h1>
+        <p class="header-subtitle">Complete Edition — All Features Unlocked</p>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-secondary" onclick="exportData()">📥 Export</button>
+        <button class="btn btn-secondary" onclick="clearAllData()">🗑️ Clear All</button>
+      </div>
+    </header>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active"  onclick="switchTab('orbit')">🪐 Orbit</button>
+      <button class="tab-btn" onclick="switchTab('friends')">👥 Friends</button>
+      <button class="tab-btn" onclick="switchTab('analytics')">📊 Analytics</button>
+      <button class="tab-btn" onclick="switchTab('timeline')">📅 Timeline</button>
+      <button class="tab-btn" onclick="switchTab('insights')">🔍 Insights</button>
+      <button class="tab-btn" onclick="switchTab('comparisons')">⚖️ Compare</button>
+      <button class="tab-btn" onclick="switchTab('constellations')">⭐ Groups</button>
+    </div>
+
+    <!-- Orbit Tab -->
+    <div id="orbit" class="tab-content active">
+      <div style="display:grid;grid-template-columns:1fr 270px;gap:20px;">
+        <div>
+        <div class="orbit">
+          <svg id="orbit-svg" viewBox="0 0 800 800">
+            <defs>
+              <radialGradient id="planet-gradient" cx="35%" cy="28%" r="70%">
+                <stop offset="0%"   stop-color="#e0d6ff"/>
+                <stop offset="40%"  stop-color="#9b8cff"/>
+                <stop offset="100%" stop-color="#3b2d9a"/>
+              </radialGradient>
+              <radialGradient id="glow-gradient" cx="50%" cy="50%" r="50%">
+                <stop offset="0%"   stop-color="rgba(123,97,255,0.5)"/>
+                <stop offset="100%" stop-color="rgba(123,97,255,0)"/>
+              </radialGradient>
+              <filter id="blur-glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="12"/>
+              </filter>
+              <filter id="soft-glow" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="5"/>
+              </filter>
+              <filter id="bh-distort" x="-40%" y="-40%" width="180%" height="180%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.035 0.035" numOctaves="4" seed="5" result="noise"/>
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="6" xChannelSelector="R" yChannelSelector="G"/>
+              </filter>
+            </defs>
+            <g id="orbit-rings"></g>
+            <g id="center-planet"></g>
+            <g id="friend-stars"></g>
+            <g id="drag-tooltip" pointer-events="none"></g>
+          </svg>
+        </div>
+        <p class="drag-hint">🖱️ Drag any planet to reposition &amp; adjust closeness</p>
+        </div>
+
+        <div>
+          <div class="card">
+            <h3>✨ Add Friend</h3>
+            <form id="friend-form">
+              <label>Profile Photo
+                <div class="avatar-upload-row">
+                  <div class="avatar-circle" id="add-avatar-preview" onclick="document.getElementById('friend-avatar').click()">📷</div>
+                  <div class="avatar-upload-hint">Click to upload<br>a profile photo</div>
+                </div>
+                <input type="file" id="friend-avatar" accept="image/*" style="display:none" />
+              </label>
+              <label>Name
+                <input id="friend-name" name="name" placeholder="e.g., Maya" required />
+              </label>
+              <label>Tag
+                <input id="friend-tag" name="tag" placeholder="e.g., best friend" />
+              </label>
+              <label>Notes
+                <textarea id="friend-notes" name="notes" placeholder="Write notes about this friendship..."></textarea>
+              </label>
+              <label>Closeness
+                <input id="friend-closeness" name="closeness" type="range" min="5" max="100" value="72" />
+                <span class="range-value" id="closeness-value">72</span>
+              </label>
+              <label>Importance
+                <input id="friend-importance" name="importance" type="range" min="20" max="100" value="70" />
+                <span class="range-value" id="importance-value">70</span>
+              </label>
+              <label>Type
+                <select id="friend-type" name="type">
+                  <option value="inner">Inner Circle</option>
+                  <option value="creative">Creative Spark</option>
+                  <option value="steady">Steady Anchor</option>
+                  <option value="growing">Growing Bond</option>
+                </select>
+              </label>
+              <label>Status
+                <select id="friend-status" name="status">
+                  <option value="normal">⭐ Normal</option>
+                  <option value="toxic">☣️ Toxic</option>
+                  <option value="cutoff">✂️ Cut Off</option>
+                </select>
+              </label>
+              <button type="submit" class="btn btn-primary" style="margin-top:4px;">Add Friend</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Friends Tab -->
+    <div id="friends" class="tab-content">
+      <div style="display:grid;grid-template-columns:280px 1fr;gap:20px;">
+        <div class="card">
+          <h3>Your Friends</h3>
+          <div id="friend-list" class="list"></div>
+        </div>
+        <div id="friend-detail-panel" class="card"></div>
+      </div>
+    </div>
+
+    <!-- Analytics Tab -->
+    <div id="analytics" class="tab-content">
+      <div class="grid">
+        <div class="card">
+          <h3>📊 Overview</h3>
+          <div class="stat-box"><div class="stat-label">Total Friends</div><div class="stat-value" id="stat-total">0</div></div>
+          <div class="stat-box"><div class="stat-label">Avg Closeness</div><div class="stat-value" id="stat-avg-closeness">0</div></div>
+          <div class="stat-box"><div class="stat-label">Avg Importance</div><div class="stat-value" id="stat-avg-importance">0</div></div>
+        </div>
+        <div class="card">
+          <h3>❤️ Closest Friends</h3>
+          <div id="closest-friends"></div>
+        </div>
+        <div class="card">
+          <h3>⭐ Most Important</h3>
+          <div id="important-friends"></div>
+        </div>
+        <div class="card">
+          <h3>✨ Relationship Health</h3>
+          <div style="font-size:13px;display:flex;flex-direction:column;gap:8px;">
+            <span class="health-badge health-balanced">✓ <span id="health-balanced">0</span> Balanced</span>
+            <span class="health-badge health-growing">↑ <span id="health-growing">0</span> Growing</span>
+            <span class="health-badge health-onesided">→ <span id="health-onesided">0</span> One-sided</span>
+            <span class="health-badge health-drifting">↓ <span id="health-drifting">0</span> Drifting</span>
+          </div>
+        </div>
+        <div class="card">
+          <h3>👥 By Type</h3>
+          <div id="by-type"></div>
+        </div>
+        <div class="card">
+          <h3>🎯 Network Graph</h3>
+          <div id="network-summary" style="font-size:13px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timeline Tab -->
+    <div id="timeline" class="tab-content">
+      <div class="card">
+        <h3>Relationship Timeline</h3>
+        <div id="timeline-container"></div>
+      </div>
+    </div>
+
+    <!-- Insights Tab -->
+    <div id="insights" class="tab-content">
+      <div class="grid" style="grid-template-columns:1fr;">
+        <div class="card">
+          <h3>🔍 Relationship Insights</h3>
+          <div id="insights-container"></div>
+        </div>
+        <div class="card">
+          <h3>⚠️ Blind Spots</h3>
+          <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Areas where your perception might differ from reality</p>
+          <div id="blind-spots-container"></div>
+        </div>
+        <div class="card">
+          <h3>💭 AI Recommendations</h3>
+          <div id="ai-recommendations"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparisons Tab -->
+    <div id="comparisons" class="tab-content">
+      <div class="card">
+        <h3>Compare Two Friends</h3>
+        <form id="compare-form" style="display:grid;grid-template-columns:1fr 1fr 140px;gap:12px;margin-bottom:20px;">
+          <label>Friend 1<select id="friend1-select" required><option value="">Select friend...</option></select></label>
+          <label>Friend 2<select id="friend2-select" required><option value="">Select friend...</option></select></label>
+          <button type="submit" class="btn btn-primary" style="align-self:flex-end;">Compare</button>
+        </form>
+        <div id="comparison-result"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Constellations Tab -->
+  <div id="constellations" class="tab-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div>
+        <h2 style="font-size:20px;font-weight:800;">⭐ Constellations</h2>
+        <p style="font-size:13px;color:var(--text-secondary);margin-top:4px;">Themed groups of friends organised by shared purpose</p>
+      </div>
+      <button class="btn btn-primary" onclick="openCreateGroupModal()">+ Create Group</button>
+    </div>
+    <div id="groups-container" class="groups-grid"></div>
+  </div>
+
+  <!-- Create / Edit Group Modal -->
+  <div id="group-modal" class="modal">
+    <div class="modal-content" style="width:680px;">
+      <div class="modal-header">
+        <h2 id="group-modal-title" style="font-size:18px;">Create Constellation</h2>
+        <button class="modal-close" onclick="closeGroupModal()">×</button>
+      </div>
+      <form id="group-form">
+        <label>Group Name
+          <input id="group-name" placeholder="e.g., Support Circle" required />
+        </label>
+        <label>Purpose / Description
+          <textarea id="group-purpose" placeholder="What does this group mean to you?" style="min-height:68px;"></textarea>
+        </label>
+        <label>Icon
+          <div class="icon-picker-row" id="icon-picker">
+            <button type="button" class="icon-btn" data-icon="💪">💪</button>
+            <button type="button" class="icon-btn" data-icon="🎨">🎨</button>
+            <button type="button" class="icon-btn" data-icon="🌍">🌍</button>
+            <button type="button" class="icon-btn" data-icon="📚">📚</button>
+            <button type="button" class="icon-btn" data-icon="⚡">⚡</button>
+            <button type="button" class="icon-btn" data-icon="💖">💖</button>
+            <button type="button" class="icon-btn" data-icon="🧠">🧠</button>
+            <button type="button" class="icon-btn" data-icon="🤝">🤝</button>
+            <button type="button" class="icon-btn" data-icon="🚀">🚀</button>
+          </div>
+        </label>
+        <label>Colour
+          <div class="color-picker-row" id="color-picker"></div>
+        </label>
+        <label>Members (select at least 1)
+          <div class="members-grid" id="group-members-select"></div>
+        </label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;">
+          <button type="submit" class="btn btn-primary" id="group-submit-btn">Create Group</button>
+          <button type="button" class="btn btn-secondary" onclick="closeGroupModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Group Detail Modal -->
+  <div id="group-detail-modal" class="modal">
+    <div class="modal-content" style="width:760px;">
+      <div class="modal-header">
+        <h2 id="detail-group-title" style="font-size:18px;"></h2>
+        <button class="modal-close" onclick="closeDetailModal()">×</button>
+      </div>
+      <div id="group-detail-content"></div>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div id="edit-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 style="font-size:18px;">Edit Friend</h2>
+        <button class="modal-close" onclick="closeEditModal()">×</button>
+      </div>
+      <form id="edit-form">
+        <label>Profile Photo
+          <div class="avatar-upload-row">
+            <div class="avatar-circle" id="edit-avatar-preview" onclick="document.getElementById('edit-avatar').click()">📷</div>
+            <div class="avatar-upload-hint">Click to change<br>profile photo</div>
+          </div>
+          <input type="file" id="edit-avatar" accept="image/*" style="display:none" />
+        </label>
+        <label>Name<input id="edit-name" required /></label>
+        <label>Tag<input id="edit-tag" /></label>
+        <label>Notes<textarea id="edit-notes"></textarea></label>
+        <label>Closeness
+          <input id="edit-closeness" type="range" min="5" max="100" />
+          <span class="range-value" id="edit-closeness-value">0</span>
+        </label>
+        <label>Importance
+          <input id="edit-importance" type="range" min="20" max="100" />
+          <span class="range-value" id="edit-importance-value">0</span>
+        </label>
+        <label>Type
+          <select id="edit-type">
+            <option value="inner">Inner Circle</option>
+            <option value="creative">Creative Spark</option>
+            <option value="steady">Steady Anchor</option>
+            <option value="growing">Growing Bond</option>
+          </select>
+        </label>
+        <label>Status
+          <select id="edit-status">
+            <option value="normal">⭐ Normal</option>
+            <option value="toxic">☣️ Toxic</option>
+            <option value="cutoff">✂️ Cut Off</option>
+          </select>
+        </label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;">
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+          <button type="button" class="btn btn-danger" onclick="deleteSelectedFriend()">Delete Friend</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="script-complete.js"></script>
+</body>
+</html>
