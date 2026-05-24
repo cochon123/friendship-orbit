@@ -46,7 +46,7 @@ type Ctx = {
     }>,
   ) => Promise<Friend | undefined>;
   deleteFriendById: (id: string) => Promise<void>;
-  persistOrbit: (id: string, angle: number, closeness: number) => Promise<void>;
+  persistOrbit: (id: string, angle: number, closeness: number) => Promise<boolean>;
   setAvatar: (dataUrl: string | null) => Promise<void>;
   createGroupReq: (b: {
     name: string;
@@ -196,12 +196,25 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
 
   const persistOrbit = useCallback<Ctx["persistOrbit"]>(
     async (id, angle, closeness) => {
-      await fetch(`/api/friends/${encodeURIComponent(id)}/orbit`, {
+      const res = await fetch(`/api/friends/${encodeURIComponent(id)}/orbit`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ angle, closeness }),
       });
+      if (!res.ok) {
+        let msg = "Could not save orbit";
+        try {
+          const j = (await res.json()) as { error?: string };
+          if (j.error) msg = j.error;
+        } catch {
+          /* ignore */
+        }
+        emitToast(msg);
+        await refresh();
+        return false;
+      }
       await refresh();
+      return true;
     },
     [refresh],
   );

@@ -45,20 +45,21 @@ body {
 }
 
 @keyframes fo-shoot {
+  /* Diagonal path matches rotate(-20deg); opposite sign = opposite travel direction. */
   0% {
     opacity: 0;
-    transform: translateX(0) rotate(-20deg);
+    transform: translate3d(0, 0, 0) rotate(-20deg);
   }
   5% {
     opacity: 1;
   }
   40% {
     opacity: 0;
-    transform: translateX(60vw) rotate(-20deg);
+    transform: translate3d(-58vw, 21vw, 0) rotate(-20deg);
   }
   100% {
     opacity: 0;
-    transform: translateX(60vw) rotate(-20deg);
+    transform: translate3d(-58vw, 21vw, 0) rotate(-20deg);
   }
 }
 
@@ -70,6 +71,7 @@ body {
     transform: rotate(360deg);
   }
 }
+
 
 @keyframes fo-planet-float {
   0%,
@@ -89,17 +91,6 @@ body {
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
-  }
-}
-
-@keyframes fo-star-pop {
-  from {
-    opacity: 0;
-    transform: scale(0);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
   }
 }
 
@@ -133,10 +124,6 @@ body {
 
 #orbit-svg #center-planet {
   animation: fo-planet-float 7s ease-in-out infinite;
-}
-
-.friend-star-group {
-  animation: fo-star-pop 0.4s cubic-bezier(0.2, 1.4, 0.4, 1) both;
 }
 
 #orbit-svg.dragging {

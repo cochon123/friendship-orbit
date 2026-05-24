@@ -16,19 +16,33 @@ type DragState =
   | { id: string; moved: boolean; startX: number; startY: number }
   | null;
 
+type OrbitDraft = { angle: number; closeness: number };
+
+/** Normalize angular difference so refreshed server angle matches draft after drag. */
+function anglesAlmostEqual(a: number, b: number, eps = 0.02) {
+  let d = ((a - b) % 360 + 360) % 360;
+  if (d > 180) d = 360 - d;
+  return d < eps;
+}
+
+function orbitDraftMatches(friend: Friend, d: OrbitDraft) {
+  if (Math.round(friend.closeness) !== Math.round(d.closeness)) return false;
+  return anglesAlmostEqual(friend.angle, d.angle);
+}
+
 export function OrbitVisualizer(props: {
   friends: Friend[];
   profile: Profile;
   selectedFriendId: string | null;
   onSelectFriendId: (id: string | null) => void;
-  onPersistOrbit: (id: string, angle: number, closeness: number) => Promise<void>;
+  onPersistOrbit: (id: string, angle: number, closeness: number) => Promise<boolean>;
   onOpenUserAvatar: () => void;
 }) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const friendsRef = useRef(props.friends);
   friendsRef.current = props.friends;
 
-  const draftRef = useRef<Map<string, { angle: number; closeness: number }>>(new Map());
+  const draftRef = useRef<Map<string, OrbitDraft>>(new Map());
   const dragStateRef = useRef<DragState>(null);
 
   const paint = useCallback(() => {
@@ -47,6 +61,10 @@ export function OrbitVisualizer(props: {
   }, [props.profile.userAvatar, props.selectedFriendId, props.onOpenUserAvatar]);
 
   useLayoutEffect(() => {
+    for (const [id, d] of [...draftRef.current.entries()]) {
+      const f = props.friends.find((x) => x.id === id);
+      if (f && orbitDraftMatches(f, d)) draftRef.current.delete(id);
+    }
     paint();
   }, [paint, props.friends]);
 
@@ -124,15 +142,17 @@ export function OrbitVisualizer(props: {
         const tooltip = tooltipHolder();
         if (tooltip) tooltip.innerHTML = "";
         if (d) {
-          await persist(dragState.id, d.angle, d.closeness);
+          const ok = await persist(dragState.id, d.angle, d.closeness);
+          if (!ok) draftRef.current.delete(dragState.id);
+          /* On success keep draft until props.friends reflects the save (React batches setState). */
         }
       } else {
         props.onSelectFriendId(dragState.id);
         router.push("/friends");
+        draftRef.current.delete(dragState.id);
       }
 
       dragStateRef.current = null;
-      draftRef.current.delete(dragState.id);
       paint();
     }
 

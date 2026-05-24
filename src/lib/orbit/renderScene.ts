@@ -89,7 +89,6 @@ function render3DPlanetNode(
   point: { x: number; y: number },
   friend: Friend,
   defs: Element,
-  idx: number,
 ) {
   const r = 21;
   const gradId = `planet3d-${friend.id}`;
@@ -174,21 +173,6 @@ function render3DPlanetNode(
   });
   lbl.textContent = friend.name.length > 8 ? friend.name.slice(0, 7) + "…" : friend.name;
   g.append(lbl);
-
-  const pulse = ns("circle", {
-    cx: String(point.x),
-    cy: String(point.y),
-    r: String(r),
-    fill: "none",
-    stroke: friend.color,
-    "stroke-width": "2",
-    opacity: "0",
-    "pointer-events": "none",
-  });
-  pulse.innerHTML = `
-    <animate attributeName="r"       from="${r}" to="${r + 20}" dur="3s" repeatCount="indefinite" begin="${idx * 0.35}s"/>
-    <animate attributeName="opacity" from="0.55" to="0"       dur="3s" repeatCount="indefinite" begin="${idx * 0.35}s"/>`;
-  g.append(pulse);
 }
 
 function renderBlackHoleNode(
@@ -521,31 +505,30 @@ export function paintOrbitSvg(svg: SVGSVGElement, opts: OrbitPaintOptions): void
 
   starLayer.replaceChildren();
 
-  opts.friends.forEach((friend, i) => {
+  opts.friends.forEach((friend) => {
     const point = polarToPoint(friend.angle, distanceFromCloseness(friend.closeness));
     const g = ns("g", {
       class: "friend-star-group",
       "data-friend-id": friend.id,
-      style: `animation-delay:${i * 55}ms`,
       cursor: "grab",
     }) as SVGGElement;
 
     const isBlackHole = friend.status === "toxic" || friend.status === "cutoff";
     if (isBlackHole) renderBlackHoleNode(g, point, friend);
-    else render3DPlanetNode(g, point, friend, defs, i);
+    else render3DPlanetNode(g, point, friend, defs);
 
     if (opts.selectedFriendId === friend.id) {
-      const sel = ns("circle", {
-        cx: String(point.x),
-        cy: String(point.y),
-        r: "28",
-        fill: "none",
-        stroke: "rgba(255,255,255,0.7)",
-        "stroke-width": "2",
-        "pointer-events": "none",
-      });
-      sel.innerHTML = `<animate attributeName="stroke-opacity" from="0.7" to="0.2" dur="1.2s" repeatCount="indefinite" direction="alternate"/>`;
-      g.append(sel);
+      g.append(
+        ns("circle", {
+          cx: String(point.x),
+          cy: String(point.y),
+          r: "28",
+          fill: "none",
+          stroke: "rgba(255,255,255,0.72)",
+          "stroke-width": "2",
+          "pointer-events": "none",
+        }),
+      );
     }
 
     starLayer.append(g);
