@@ -140,6 +140,195 @@ body {
   border-color: rgba(255, 255, 255, 0.08);
 }
 
+/* Shared panels (cards, forms, CTAs — used across pages). */
+.fo-card {
+  min-width: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02));
+  border: 1px solid var(--fo-border);
+  border-radius: 14px;
+  padding: 18px;
+  backdrop-filter: blur(6px);
+}
+
+@media (hover: hover) {
+  .fo-card:hover {
+    border-color: rgba(123, 97, 255, 0.14);
+    box-shadow:
+      0 14px 36px rgba(0, 0, 0, 0.35),
+      0 0 0 1px rgba(123, 97, 255, 0.06);
+  }
+}
+
+.fo-form-label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fo-text-muted);
+  letter-spacing: 0.02em;
+}
+
+.fo-form-label .fo-form-input,
+.fo-form-label textarea.fo-form-input,
+.fo-form-label select.fo-form-input,
+.fo-form-label button.fo-form-input {
+  margin-top: 0;
+}
+
+input.fo-form-input,
+textarea.fo-form-input,
+select.fo-form-input,
+button.fo-form-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--fo-text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  transition:
+    border-color 180ms,
+    background 180ms;
+}
+
+button.fo-form-input {
+  cursor: pointer;
+  text-align: left;
+}
+
+textarea.fo-form-input {
+  resize: vertical;
+  min-height: 5rem;
+}
+
+input.fo-form-input:focus,
+textarea.fo-form-input:focus,
+select.fo-form-input:focus-visible,
+button.fo-form-input:focus-visible {
+  outline: none;
+  border-color: rgba(123, 97, 255, 0.55);
+  background: rgba(123, 97, 255, 0.07);
+}
+
+button.fo-form-input:hover {
+  border-color: rgba(123, 97, 255, 0.35);
+  background: rgba(123, 97, 255, 0.08);
+}
+
+.fo-form-label input[type="range"] {
+  width: 100%;
+  margin: 4px 0 0;
+  padding: 0;
+  accent-color: var(--fo-accent);
+  cursor: pointer;
+  height: auto;
+  min-height: 1.25rem;
+  background: transparent;
+  border: none;
+}
+
+.fo-form-label input[type="range"]:focus-visible {
+  outline: 2px solid rgba(123, 97, 255, 0.45);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+select.fo-form-input option {
+  background: #151a2e;
+  color: var(--fo-text);
+}
+
+.fo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  transition:
+    transform 160ms,
+    box-shadow 160ms,
+    filter 160ms,
+    background 160ms,
+    border-color 160ms;
+}
+
+.fo-btn-primary {
+  background: linear-gradient(135deg, var(--fo-accent), var(--fo-accent-2));
+  color: #fff;
+  box-shadow: 0 8px 30px rgba(123, 97, 255, 0.4);
+}
+
+.fo-btn-primary:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}
+
+.fo-btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--fo-text);
+  border: 1px solid var(--fo-border);
+}
+
+.fo-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.fo-btn-danger {
+  background: linear-gradient(135deg, var(--fo-danger), #ff3b7a);
+  color: #fff;
+}
+
+.fo-btn-danger:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}
+
+.fo-health-balanced,
+.fo-health-growing,
+.fo-health-onesided,
+.fo-health-drifting {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.fo-health-balanced {
+  background: rgba(111, 230, 168, 0.12);
+  color: var(--fo-success);
+  border: 1px solid rgba(111, 230, 168, 0.22);
+}
+
+.fo-health-growing {
+  background: rgba(92, 225, 230, 0.1);
+  color: var(--fo-accent-2);
+  border: 1px solid rgba(92, 225, 230, 0.2);
+}
+
+.fo-health-onesided {
+  background: rgba(255, 209, 102, 0.1);
+  color: var(--fo-warning);
+  border: 1px solid rgba(255, 209, 102, 0.22);
+}
+
+.fo-health-drifting {
+  background: rgba(255, 110, 166, 0.08);
+  color: var(--fo-danger);
+  border: 1px solid rgba(255, 110, 166, 0.18);
+}
+
 .fo-orbit-shell {
   min-height: 560px;
   width: 100%;

@@ -101,7 +101,7 @@ export default function OrbitPage() {
           </p>
         </div>
 
-        <div className="fo-card">
+        <aside className="fo-card min-h-0 max-h-[min(720px,calc(100vh-220px))] overflow-y-auto overscroll-contain lg:sticky lg:top-6 lg:self-start">
           <TitleWithIcon icon={IconSparkles} className="mb-3.5">
             Add Friend
           </TitleWithIcon>
@@ -165,7 +165,7 @@ export default function OrbitPage() {
               Add Friend
             </button>
           </form>
-        </div>
+        </aside>
       </div>
     </>
   );
