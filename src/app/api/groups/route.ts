@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { normalizeGroupIcon } from "@/lib/groupIconIds";
 import { createGroup, getAppState } from "@/server/store";
 
 export const runtime = "nodejs";
@@ -19,7 +20,8 @@ export async function POST(request: Request) {
   const b = body as Record<string, unknown>;
   const name = typeof b.name === "string" ? b.name.trim() : "";
   const purpose = typeof b.purpose === "string" ? b.purpose.trim() : "";
-  const icon = typeof b.icon === "string" ? b.icon : "💪";
+  const rawIcon = typeof b.icon === "string" ? b.icon : "";
+  const icon = normalizeGroupIcon(rawIcon);
   const color = typeof b.color === "string" ? b.color : "#ff8cc6";
   const memberIds = Array.isArray(b.memberIds)
     ? b.memberIds.filter((x): x is string => typeof x === "string")

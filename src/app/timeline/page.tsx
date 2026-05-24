@@ -1,5 +1,6 @@
 "use client";
 
+import { IconArrowDown, IconArrowRight, IconArrowUp, IconCalendar, TitleWithIcon } from "@/components/icons/Icon";
 import { useAppData } from "@/components/providers/AppDataProvider";
 
 export default function TimelinePage() {
@@ -31,7 +32,9 @@ export default function TimelinePage() {
 
   return (
     <div className="fo-card">
-      <h3 className="mb-4 text-[15px] font-bold">📅 Relationship timeline</h3>
+      <TitleWithIcon icon={IconCalendar} className="mb-4">
+        Relationship timeline
+      </TitleWithIcon>
       {!events.length ?
         <p className="text-sm text-[var(--fo-text-muted)]">
           No history yet — edit someone’s closeness or importance from Friends to record a change.
@@ -48,11 +51,16 @@ export default function TimelinePage() {
               <div className="mb-1 text-[13px]">
                 <strong>{e.friendName}</strong>
                 {e.change > 0 ?
-                  <span className="font-bold text-teal-400"> ↑ +{e.change}</span>
-                : <span className="font-bold text-pink-400"> ↓ {e.change}</span>}
+                  <span className="inline-flex items-center gap-1 font-bold text-teal-400">
+                    <IconArrowUp size={14} aria-hidden /> +{e.change}
+                  </span>
+                : <span className="inline-flex items-center gap-1 font-bold text-pink-400">
+                    <IconArrowDown size={14} aria-hidden /> {e.change}
+                  </span>}
               </div>
-              <div className="text-[11px] text-[var(--fo-text-muted)]">
-                Closeness snapshot: {e.oldC} → current {e.newC}
+              <div className="flex flex-wrap items-center gap-1 text-[11px] text-[var(--fo-text-muted)]">
+                Closeness snapshot: {e.oldC}
+                <IconArrowRight size={13} aria-hidden /> current {e.newC}
               </div>
             </div>
           ))}

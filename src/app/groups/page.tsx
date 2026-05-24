@@ -4,11 +4,14 @@ import { useMemo, useState } from "react";
 
 import { emitToast, useAppData } from "@/components/providers/AppDataProvider";
 import { GROUP_COLORS } from "@/lib/constants";
-import { enrichGroups, groupHealthEmoji, groupInsightLines, type EnrichedGroup } from "@/lib/groupStats";
+import { GroupIcon } from "@/components/icons/GroupIcon";
+import { IconClose, IconStar } from "@/components/icons/Icon";
+import { InsightHealthTrendIcon } from "@/components/icons/InsightHealthTrendIcon";
+import { enrichGroups, groupInsightLines, type EnrichedGroup } from "@/lib/groupStats";
+import { GROUP_ICON_IDS, normalizeGroupIcon, type GroupIconId } from "@/lib/groupIconIds";
 import { getHealthStatus } from "@/lib/relationship";
 import type { Friend } from "@/lib/types";
 
-const ICONS = ["💪", "🎨", "🌍", "📚", "⚡", "💖", "🧠", "🤝", "🚀"];
 
 export default function GroupsPage() {
   const { loading, friends, groups, createGroupReq, updateGroupReq, deleteGroupById } =
@@ -19,7 +22,7 @@ export default function GroupsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [purpose, setPurpose] = useState("");
-  const [icon, setIcon] = useState(ICONS[0]!);
+  const [icon, setIcon] = useState<GroupIconId>(GROUP_ICON_IDS[0]!);
   const [color, setColor] = useState(GROUP_COLORS[0]!);
   const [memberSel, setMemberSel] = useState<Record<string, boolean>>({});
 
@@ -33,7 +36,7 @@ export default function GroupsPage() {
     setEditingId(null);
     setName("");
     setPurpose("");
-    setIcon(ICONS[0]!);
+    setIcon(GROUP_ICON_IDS[0]!);
     setColor(GROUP_COLORS[0]!);
     setMemberSel({});
   }
@@ -47,7 +50,7 @@ export default function GroupsPage() {
     setEditingId(g.id);
     setName(g.name);
     setPurpose(g.purpose);
-    setIcon(g.icon);
+    setIcon(normalizeGroupIcon(g.icon));
     setColor(g.color);
     const ids: Record<string, boolean> = {};
     friends.forEach((f) => {
@@ -101,7 +104,10 @@ export default function GroupsPage() {
     <div>
       <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="text-xl font-extrabold">⭐ Constellations</h2>
+          <h2 className="flex items-center gap-2 text-xl font-extrabold">
+            <IconStar size={24} className="text-purple-400" aria-hidden />
+            Constellations
+          </h2>
           <p className="mt-1 text-[13px] text-[var(--fo-text-muted)]">
             Themed bundles — synced to SQLite with living membership joins.
           </p>
@@ -124,8 +130,9 @@ export default function GroupsPage() {
             >
               <div className="mb-3 flex items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <h3 className="truncate text-[16px] font-extrabold">
-                    {g.icon} {g.name}
+                  <h3 className="flex min-w-0 items-center gap-2 truncate text-[16px] font-extrabold">
+                    <GroupIcon storedIcon={g.icon} size={20} className="shrink-0 text-purple-300" aria-hidden />
+                    <span className="truncate">{g.name}</span>
                   </h3>
                   <p className="truncate text-[12px] text-[var(--fo-text-muted)]">{g.purpose}</p>
                 </div>
@@ -145,7 +152,7 @@ export default function GroupsPage() {
                         void deleteGroupById(g.id);
                     }}
                   >
-                    ✕
+                    <IconClose size={16} aria-label="Remove group" />
                   </button>
                 </div>
               </div>
@@ -164,7 +171,8 @@ export default function GroupsPage() {
                         : "fo-health-drifting"
                       }
                     >
-                      {groupHealthEmoji(g.stats.health)} {g.stats.health}
+                      <InsightHealthTrendIcon variant={g.stats.health} size={13} aria-hidden />{" "}
+                      {g.stats.health}
                     </span>
                   </div>
                 </div>
@@ -196,7 +204,7 @@ export default function GroupsPage() {
                 resetForm();
               }}
             >
-              ×
+              <IconClose size={22} aria-label="Close modal" />
             </button>
           </div>
           <form className="flex flex-col gap-3" onSubmit={(e) => void submitGroup(e)}>
@@ -216,18 +224,18 @@ export default function GroupsPage() {
             <div>
               <p className="fo-form-label">Icon</p>
               <div className="mt-2 flex flex-wrap gap-2">
-                {ICONS.map((ic) => (
+                {GROUP_ICON_IDS.map((ic) => (
                   <button
                     key={ic}
                     type="button"
-                    className={`h-10 w-10 rounded-[10px] border text-xl ${
+                    className={`flex h-10 w-10 items-center justify-center rounded-[10px] border text-purple-200 ${
                       ic === icon
                         ? "border-purple-500 bg-purple-900/35"
                         : "border-white/10 bg-white/5 hover:border-purple-600"
                     }`}
                     onClick={() => setIcon(ic)}
                   >
-                    {ic}
+                    <GroupIcon storedIcon={ic} size={22} />
                   </button>
                 ))}
               </div>
@@ -298,11 +306,12 @@ export default function GroupsPage() {
         {detail ?
           <div className="fo-modal-panel z-10 relative max-w-[760px]" style={{ width: 760 }}>
             <div className="mb-4 flex justify-between gap-8">
-              <h2 className="text-xl font-bold">
-                {detail.icon} {detail.name}
+              <h2 className="flex items-center gap-2 text-xl font-bold">
+                <GroupIcon storedIcon={detail.icon} size={26} className="shrink-0 text-purple-300" aria-hidden />
+                {detail.name}
               </h2>
-              <button type="button" className="fo-btn fo-btn-secondary" onClick={() => setDetail(null)}>
-                ×
+              <button type="button" className="fo-btn fo-btn-secondary inline-flex px-3 py-2" onClick={() => setDetail(null)}>
+                <IconClose size={22} aria-label="Close modal" />
               </button>
             </div>
             <blockquote className="mb-6 rounded-xl border border-white/10 bg-white/[0.03] p-5 text-[13px] italic">
@@ -352,8 +361,9 @@ export default function GroupsPage() {
                     <div className="text-purple-400">{m.closeness}</div>
                     <div className="text-teal-400">{m.importance}</div>
                   </div>
-                  <span className={`text-[10px] capitalize ${badgeCls}`}>
-                    {hs.icon} {hs.name}
+                  <span className={`inline-flex items-center gap-1 text-[10px] capitalize ${badgeCls}`}>
+                    <InsightHealthTrendIcon variant={hs.class} size={13} aria-hidden />
+                    {hs.name}
                   </span>
                 </div>
                 );

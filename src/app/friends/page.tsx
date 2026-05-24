@@ -3,6 +3,12 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
+import {
+  IconBiohazard,
+  IconClose,
+  IconScissors,
+} from "@/components/icons/Icon";
+import { InsightHealthTrendIcon } from "@/components/icons/InsightHealthTrendIcon";
 import { emitToast, useAppData } from "@/components/providers/AppDataProvider";
 import { getHealthStatus } from "@/lib/relationship";
 import type { Friend, FriendStatus, FriendType } from "@/lib/types";
@@ -68,7 +74,7 @@ export default function FriendsPage() {
       ...(pendingAvatar !== undefined ? { avatar: pendingAvatar } : {}),
     });
 
-    emitToast(editing.status !== "normal" ? "Updated — black-hole mode 🔮" : "Friend updated ✨");
+    emitToast(editing.status !== "normal" ? "Updated — black-hole mode enabled." : "Friend updated.");
     closeModal();
   }
 
@@ -119,7 +125,9 @@ export default function FriendsPage() {
                     }}
                   >
                     {isBh ?
-                      <span>{f.status === "toxic" ? "☣" : "✂"}</span>
+                      f.status === "toxic" ?
+                        <IconBiohazard size={18} className="text-orange-400" aria-hidden />
+                      : <IconScissors size={18} className="text-violet-300" aria-hidden />
                     : f.avatar ?
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={f.avatar} alt="" className="h-full w-full object-cover" />
@@ -168,8 +176,12 @@ export default function FriendsPage() {
           <div className="fo-modal-panel" role="dialog" aria-modal>
             <div className="mb-5 flex items-center justify-between">
               <h2 className="text-lg font-bold">Edit Friend</h2>
-              <button type="button" className="fo-btn fo-btn-secondary px-3 py-2" onClick={closeModal}>
-                ×
+              <button
+                type="button"
+                className="fo-btn fo-btn-secondary inline-flex px-3 py-2"
+                onClick={closeModal}
+              >
+                <IconClose size={18} aria-label="Close" />
               </button>
             </div>
             <form className="flex flex-col gap-2.5" onSubmit={(e) => void onSave(e)}>
@@ -238,9 +250,9 @@ export default function FriendsPage() {
               <label className="fo-form-label">
                 Status
                 <select name="status" className="fo-form-input" defaultValue={editing.status}>
-                  <option value="normal">⭐ Normal</option>
-                  <option value="toxic">☣️ Toxic</option>
-                  <option value="cutoff">✂️ Cut Off</option>
+                  <option value="normal">Normal</option>
+                  <option value="toxic">Toxic</option>
+                  <option value="cutoff">Cut off</option>
                 </select>
               </label>
               <div className="mt-2 grid grid-cols-2 gap-3">
@@ -287,7 +299,9 @@ function FriendDetail({ friend, onEdit }: { friend: Friend; onEdit: () => void }
                   : "0 0 24px rgba(119,0,255,0.5)",
               }}
             >
-              {friend.status === "toxic" ? "☣" : "✂"}
+              {friend.status === "toxic" ?
+                <IconBiohazard size={38} className="text-orange-400" aria-hidden />
+              : <IconScissors size={38} className="text-violet-300" aria-hidden />}
             </div>
           : friend.avatar ?
             // eslint-disable-next-line @next/next/no-img-element
@@ -329,19 +343,26 @@ function FriendDetail({ friend, onEdit }: { friend: Friend; onEdit: () => void }
           }}
         >
           {friend.status === "toxic" ?
-            <>
-              ☣️ <strong>Marked Toxic</strong> — flagged as harmful in your orbit.
-            </>
-          : <>
-              ✂️ <strong>Cut Off</strong> — this connection reads as intentionally severed.
-            </>
+            <span className="inline-flex items-start gap-2">
+              <IconBiohazard size={20} className="mt-0.5 shrink-0 text-orange-400" aria-hidden />
+              <span>
+                <strong>Marked Toxic</strong> — flagged as harmful in your orbit.
+              </span>
+            </span>
+          : <span className="inline-flex items-start gap-2">
+              <IconScissors size={20} className="mt-0.5 shrink-0 text-violet-400" aria-hidden />
+              <span>
+                <strong>Cut Off</strong> — this connection reads as intentionally severed.
+              </span>
+            </span>
           }
         </div>
       )}
 
       <div className="mb-4 rounded-[10px] border border-[var(--fo-border)] bg-white/[0.03] p-3">
-        <span className={healthCls}>
-          {health.icon} {health.name}
+        <span className={`inline-flex items-center gap-2 ${healthCls}`}>
+          <InsightHealthTrendIcon variant={health.class} size={17} aria-hidden />
+          {health.name}
         </span>
         <p className="mt-2 text-xs text-[var(--fo-text-muted)]">{health.description}</p>
       </div>

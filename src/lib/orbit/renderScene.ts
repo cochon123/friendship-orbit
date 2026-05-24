@@ -39,6 +39,10 @@ function escapeXml(str: string) {
     .replaceAll('"', "&quot;");
 }
 
+/** Matches `IconBiohazard` (24px viewBox) for inline orbit SVG. */
+const GLYPH_BIOHAZARD_D =
+  "M12 3a7 7 0 0 1 3.6 1L12 8.5 8.4 4A7 7 0 0 1 12 3zM19.4 7.5a7 7 0 0 1 0 9L14.4 10l5-2.5zM4.6 16.5a7 7 0 0 1 0-9L9.6 14l-5 2.5zM12 21a7 7 0 0 1-3.6-1L12 15.5l3.6 4.5A7 7 0 0 1 12 21z";
+
 function ns(tag: string, attrs: Record<string, string>) {
   const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
   for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
@@ -251,17 +255,22 @@ function renderBlackHoleNode(
     }),
   );
 
-  const icon = ns("text", {
-    x: String(point.x),
-    y: String(point.y + 6),
-    "text-anchor": "middle",
-    "font-size": "13",
+  const iconGrp = ns("g", {
+    transform: `translate(${point.x - 11}, ${point.y - 11}) scale(0.65)`,
     fill: "rgba(255,255,255,0.25)",
+    stroke: "none",
     "pointer-events": "none",
-    "font-family": "Inter,sans-serif",
   });
-  icon.textContent = isToxic ? "☣" : "✂";
-  g.append(icon);
+  if (isToxic) {
+    iconGrp.innerHTML = `<circle cx="12" cy="12" r="2" /><path d="${GLYPH_BIOHAZARD_D}"/>`;
+  } else {
+    iconGrp.setAttribute("transform", `translate(${point.x - 12}, ${point.y - 12}) scale(1)`);
+    iconGrp.innerHTML =
+      `<g stroke="rgba(255,255,255,0.42)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none">` +
+      `<circle cx="7.5" cy="6.5" r="3"/><circle cx="7.5" cy="17.5" r="3"/>` +
+      `<path d="M21 20l-6.5-6.5"/><path d="M21 8l-6.5 6.5"/></g>`;
+  }
+  g.append(iconGrp);
 
   const labelColor = isToxic ? "rgba(255,130,80,0.8)" : "rgba(160,120,255,0.8)";
   const nameLbl = ns("text", {
@@ -297,16 +306,25 @@ export function showDragTooltip(
   svgPt: { x: number; y: number },
   friend: Friend,
 ) {
-  const px = svgPt.x + 16,
+  const px = svgPt.x + 14,
     py = svgPt.y - 26;
-  const icon =
-    friend.status === "toxic" ? "☣" : friend.status === "cutoff" ? "✂" : "⬤";
+  let glyph = `<circle cx="${px + 13}" cy="${py + 16}" r="4" fill="white"/>`;
+  if (friend.status === "toxic") {
+    glyph = `<g transform="translate(${px + 6}, ${py + 8}) scale(0.4)" stroke="none" fill="white">` +
+      `<circle cx="12" cy="12" r="2" /><path d="${GLYPH_BIOHAZARD_D}"/></g>`;
+  } else if (friend.status === "cutoff") {
+    glyph =
+      `<g transform="translate(${px + 6}, ${py + 7}) scale(1.05)" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">` +
+      `<circle cx="7.5" cy="6.5" r="3"/><circle cx="7.5" cy="17.5" r="3"/>` +
+      `<path d="M21 20l-6.5-6.5"/><path d="M21 8l-6.5 6.5"/></g>`;
+  }
   layer.innerHTML = `
-    <rect x="${px}" y="${py}" width="140" height="26" rx="7"
+    <rect x="${px}" y="${py}" width="160" height="26" rx="7"
       fill="rgba(10,12,28,0.88)" stroke="rgba(123,97,255,0.45)" stroke-width="1"/>
-    <text x="${px + 70}" y="${py + 17}" text-anchor="middle" font-size="11"
+    ${glyph}
+    <text x="${px + 90}" y="${py + 17}" text-anchor="middle" font-size="11"
       fill="white" font-family="Inter,sans-serif" font-weight="700">
-      ${icon} ${escapeXml(friend.name)} · ${friend.closeness}
+      ${escapeXml(friend.name)} · ${friend.closeness}
     </text>`;
 }
 
@@ -477,16 +495,17 @@ export function paintOrbitSvg(svg: SVGSVGElement, opts: OrbitPaintOptions): void
   planetLayer.append(youLbl);
 
   if (!opts.userAvatar) {
-    const hint = ns("text", {
-      x: String(center.x),
-      y: String(center.y + pr - 10),
-      "text-anchor": "middle",
-      "font-size": "11",
-      fill: "rgba(255,255,255,0.38)",
-      "font-family": "Inter,sans-serif",
+    const hint = ns("g", {
+      transform: `translate(${center.x - 60}, ${center.y + pr - 30})`,
       "pointer-events": "none",
     });
-    hint.textContent = "📷 tap";
+    hint.innerHTML = `
+      <g transform="translate(4, -2)" fill="none" stroke="rgba(255,255,255,0.36)" stroke-width="1">
+        <path d="M4 10a2 2 0 0 1 2-2h1.8L9 7h6l1.2 1H17a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8z"/>
+        <circle cx="12" cy="14" r="3"/>
+      </g>
+      <text x="30" y="12" fill="rgba(255,255,255,0.36)" font-size="11"
+        font-family="Inter,sans-serif">tap photo</text>`;
     planetLayer.append(hint);
   }
 

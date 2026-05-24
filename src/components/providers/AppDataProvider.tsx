@@ -157,7 +157,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         throw new Error(j.error);
       }
       await refresh();
-      emitToast(`${payload.name} added! ✨`);
+      emitToast(`${payload.name} added!`);
     },
     [refresh],
   );
@@ -214,7 +214,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ userAvatar }),
       });
       await refresh();
-      emitToast("Your profile photo updated! 🌟");
+      emitToast("Your profile photo updated.");
     },
     [refresh],
   );
@@ -232,7 +232,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         return;
       }
       await refresh();
-      emitToast(`${b.name} created! ⭐`);
+      emitToast(`${b.name} created.`);
     },
     [refresh],
   );
@@ -250,7 +250,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         return;
       }
       await refresh();
-      emitToast(`${b.name} updated! ⭐`);
+      emitToast(`${b.name} updated.`);
     },
     [refresh],
   );

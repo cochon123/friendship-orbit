@@ -64,21 +64,6 @@ export function enrichGroups(friends: Friend[], groups: GroupRow[]): EnrichedGro
   });
 }
 
-export function groupHealthEmoji(h: EnrichedGroup["stats"]["health"]) {
-  switch (h) {
-    case "balanced":
-      return "✓";
-    case "growing":
-      return "↑";
-    case "onesided":
-      return "→";
-    case "drifting":
-      return "↓";
-    default:
-      return "?";
-  }
-}
-
 export function groupInsightLines(g: EnrichedGroup): string[] {
   const m = g.members;
   const s = g.stats;

@@ -2,6 +2,17 @@
 
 import { useMemo } from "react";
 
+import {
+  IconChartBars,
+  IconHeart,
+  IconSparkles,
+  IconStar,
+  IconTargetNetwork,
+  IconCircleBlackHole,
+  IconUsersGroup,
+  TitleWithIcon,
+} from "@/components/icons/Icon";
+import { InsightHealthTrendIcon } from "@/components/icons/InsightHealthTrendIcon";
 import { useAppData } from "@/components/providers/AppDataProvider";
 import { TYPE_COLORS } from "@/lib/constants";
 import type { FriendType } from "@/lib/types";
@@ -73,7 +84,9 @@ export default function AnalyticsPage() {
   return (
     <div className="grid gap-[18px] md:grid-cols-2 lg:grid-cols-3">
       <div className="fo-card">
-        <h3 className="mb-3.5 text-[15px] font-bold">📊 Overview</h3>
+        <TitleWithIcon icon={IconChartBars} className="mb-3.5">
+          Overview
+        </TitleWithIcon>
         <div className="mb-3 rounded-[10px] border border-purple-900/35 bg-purple-950/25 p-3">
           <div className="text-xs text-[var(--fo-text-muted)]">Total Friends</div>
           <div className="text-2xl font-extrabold">{friends.length}</div>
@@ -89,27 +102,47 @@ export default function AnalyticsPage() {
       </div>
 
       <div className="fo-card">
-        <h3 className="mb-3.5 text-[15px] font-bold">❤️ Closest</h3>
+        <TitleWithIcon icon={IconHeart} iconClassName="text-pink-400" className="mb-3.5">
+          Closest
+        </TitleWithIcon>
         {stats.closest.map((f) => stats.rowFn(f, f.closeness))}
       </div>
 
       <div className="fo-card">
-        <h3 className="mb-3.5 text-[15px] font-bold">⭐ Most important</h3>
+        <TitleWithIcon icon={IconStar} className="mb-3.5">
+          Most important
+        </TitleWithIcon>
         {stats.important.map((f) => stats.rowFn(f, f.importance))}
       </div>
 
       <div className="fo-card">
-        <h3 className="mb-3.5 text-[15px] font-bold">✨ Health mix</h3>
+        <TitleWithIcon icon={IconSparkles} className="mb-3.5">
+          Health mix
+        </TitleWithIcon>
         <div className="flex flex-col gap-2 text-[13px] font-bold">
-          <span className="fo-health-balanced">✓ {stats.balanced} balanced</span>
-          <span className="fo-health-growing">↑ {stats.growing} growing</span>
-          <span className="fo-health-onesided">→ {stats.onesided} one-sided</span>
-          <span className="fo-health-drifting">↓ {stats.drifting} drifting</span>
+          <span className="fo-health-balanced inline-flex items-center gap-2">
+            <InsightHealthTrendIcon variant="balanced" size={16} aria-hidden />
+            {stats.balanced} balanced
+          </span>
+          <span className="fo-health-growing inline-flex items-center gap-2">
+            <InsightHealthTrendIcon variant="growing" size={16} aria-hidden />
+            {stats.growing} growing
+          </span>
+          <span className="fo-health-onesided inline-flex items-center gap-2">
+            <InsightHealthTrendIcon variant="onesided" size={16} aria-hidden />
+            {stats.onesided} one-sided
+          </span>
+          <span className="fo-health-drifting inline-flex items-center gap-2">
+            <InsightHealthTrendIcon variant="drifting" size={16} aria-hidden />
+            {stats.drifting} drifting
+          </span>
         </div>
       </div>
 
       <div className="fo-card">
-        <h3 className="mb-3.5 text-[15px] font-bold">👥 By type</h3>
+        <TitleWithIcon icon={IconUsersGroup} className="mb-3.5">
+          By type
+        </TitleWithIcon>
         {(Object.entries(stats.byType) as [FriendType, number][]).map(([t, c]) => (
           <div key={t} className="mb-2 flex justify-between text-xs">
             <span style={{ color: TYPE_COLORS[t] }} className="font-semibold capitalize">
@@ -121,7 +154,9 @@ export default function AnalyticsPage() {
       </div>
 
       <div className="fo-card">
-        <h3 className="mb-3.5 text-[15px] font-bold">🎯 Network</h3>
+        <TitleWithIcon icon={IconTargetNetwork} className="mb-3.5">
+          Network
+        </TitleWithIcon>
         <div className="space-y-2 text-[13px]">
           <p>
             You have <strong>{friends.length}</strong> friend{friends.length !== 1 ? "s" : ""}.
@@ -130,8 +165,11 @@ export default function AnalyticsPage() {
             <strong>{stats.balanced}</strong> balanced today.
           </p>
           {stats.blackHoles.length > 0 && (
-            <p className="text-orange-400">
-              ⚫ {stats.blackHoles.length} black hole{stats.blackHoles.length !== 1 ? "s" : ""}.
+            <p className="inline-flex flex-wrap items-center gap-2 text-orange-400">
+              <IconCircleBlackHole size={18} aria-hidden />
+              <span>
+                {stats.blackHoles.length} black hole{stats.blackHoles.length !== 1 ? "s" : ""}.
+              </span>
             </p>
           )}
           <p>

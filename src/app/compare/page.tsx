@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 
+import { IconScale, TitleWithIcon } from "@/components/icons/Icon";
 import { emitToast, useAppData } from "@/components/providers/AppDataProvider";
 import { TYPE_COLORS } from "@/lib/constants";
 
@@ -33,7 +34,9 @@ export default function ComparePage() {
 
   return (
     <div className="fo-card">
-      <h3 className="mb-4 text-[15px] font-bold">⚖️ Compare friends</h3>
+      <TitleWithIcon icon={IconScale} className="mb-4">
+        Compare friends
+      </TitleWithIcon>
       <form className="mb-5 grid gap-4 sm:grid-cols-[1fr_1fr_auto]" onSubmit={submit}>
         <label className="fo-form-label">
           Friend A

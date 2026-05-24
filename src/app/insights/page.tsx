@@ -1,6 +1,17 @@
 "use client";
 
 import type { ReactNode } from "react";
+
+import {
+  IconCircleBlackHole,
+  IconLightbulb,
+  IconSearchInsights,
+  IconStar,
+  IconThoughtBubble,
+  IconWarningTriangle,
+  TitleWithIcon,
+} from "@/components/icons/Icon";
+import { InsightHealthTrendIcon } from "@/components/icons/InsightHealthTrendIcon";
 import { useAppData } from "@/components/providers/AppDataProvider";
 import { getHealthStatus } from "@/lib/relationship";
 import type { Friend } from "@/lib/types";
@@ -33,10 +44,12 @@ export default function InsightsPage() {
         key="bh"
         className="rounded-[10px] border border-orange-500/25 bg-orange-950/20 px-3 py-3 text-[13px]"
       >
-        <strong className="text-orange-300">⚫ Black hole orbit</strong>
+        <strong className="inline-flex items-center gap-2 text-orange-300">
+          <IconCircleBlackHole size={18} aria-hidden /> Black hole orbit
+        </strong>
         <p className="mt-1">
-          {blackHoles.map((f) => f.name).join(", ")} marked as draining or deliberately closed —
-          keep tending to boundaries.
+          {blackHoles.map((f) => f.name).join(", ")} marked as draining or deliberately closed — keep tending
+          to boundaries.
         </p>
       </div>,
     );
@@ -44,7 +57,9 @@ export default function InsightsPage() {
   if (drifting.length) {
     recCards.push(
       <div key="dr" className="rounded-[10px] border border-purple-500/25 px-3 py-3 text-[13px]">
-        <strong>💡 Drifting ties</strong>
+        <strong className="inline-flex items-center gap-2">
+          <IconLightbulb size={18} className="text-amber-200" aria-hidden /> Drifting ties
+        </strong>
         <p className="mt-1 text-[var(--fo-text-muted)]">
           Consider checking in soon with {drifting.map((f) => f.name).join(", ")}.
         </p>
@@ -65,7 +80,9 @@ export default function InsightsPage() {
   if (growingStrong.length) {
     recCards.push(
       <div key="gr" className="rounded-[10px] border border-teal-500/25 px-3 py-3 text-[13px]">
-        <strong className="text-teal-200">⭐ Deepening bonds</strong>
+        <strong className="inline-flex items-center gap-2 text-teal-200">
+          <IconStar size={18} aria-hidden /> Deepening bonds
+        </strong>
         <p className="mt-1">{growingStrong.map((f) => f.name).join(", ")}</p>
       </div>,
     );
@@ -84,7 +101,9 @@ export default function InsightsPage() {
   return (
     <div className="flex flex-col gap-5">
       <div className="fo-card">
-        <h3 className="mb-4 text-[15px] font-bold">🔍 Per-friend snapshots</h3>
+        <TitleWithIcon icon={IconSearchInsights} className="mb-4">
+          Per-friend snapshots
+        </TitleWithIcon>
         <div className="flex flex-col gap-3">
           {friends.map((f: Friend) => {
             const h = getHealthStatus(f);
@@ -106,7 +125,10 @@ export default function InsightsPage() {
                 className="rounded-[10px] border border-purple-900/25 bg-gradient-to-br from-purple-900/25 to-teal-900/10 px-4 py-3 text-[13px]"
               >
                 <strong>{f.name}</strong>{" "}
-                <span className={`inline-block px-2 py-0.5 text-[10px] ${badgeCls}`}>{h.name}</span>
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] ${badgeCls}`}>
+                  <InsightHealthTrendIcon variant={h.class} size={12} aria-hidden />
+                  {h.name}
+                </span>
                 <p className="mt-2 text-[var(--fo-text-muted)]">{text}</p>
               </div>
             );
@@ -115,7 +137,9 @@ export default function InsightsPage() {
       </div>
 
       <div className="fo-card">
-        <h3 className="mb-2 text-[15px] font-bold">⚠️ Blind spots</h3>
+        <TitleWithIcon icon={IconWarningTriangle} className="mb-2" iconClassName="text-amber-300">
+          Blind spots
+        </TitleWithIcon>
         <p className="mb-4 text-[12px] text-[var(--fo-text-muted)]">
           Larger gaps between how close you actually are and how much weight you assign the bond.
         </p>
@@ -133,7 +157,9 @@ export default function InsightsPage() {
                 key={f.id}
                 className="mb-3 rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-3 text-[13px]"
               >
-                <strong className="text-amber-200">⚠️ {f.name}</strong>
+                <strong className="inline-flex items-center gap-2 text-amber-200">
+                  <IconWarningTriangle size={17} aria-hidden /> {f.name}
+                </strong>
                 <p className="mt-1">{msg}</p>
               </div>
             );
@@ -141,13 +167,17 @@ export default function InsightsPage() {
       </div>
 
       <div className="fo-card">
-        <h3 className="mb-4 text-[15px] font-bold">💭 Suggested focus</h3>
+        <TitleWithIcon icon={IconThoughtBubble} className="mb-4">
+          Suggested focus
+        </TitleWithIcon>
         {recCards.length === 0 ?
-          <p className="text-sm text-[var(--fo-text-muted)]">Looks healthy overall 🌟</p>
+          <div className="inline-flex flex-wrap items-center gap-2 text-sm text-[var(--fo-text-muted)]">
+            Looks healthy overall
+            <IconStar size={16} className="text-purple-400" aria-hidden />
+          </div>
         : <div className="space-y-3">{recCards}</div>
         }
       </div>
     </div>
   );
 }
-

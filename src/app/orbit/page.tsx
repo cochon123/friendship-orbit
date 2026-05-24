@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 
+import { IconMouseDrag, IconSparkles, TitleWithIcon } from "@/components/icons/Icon";
 import { OrbitVisualizer } from "@/components/orbit/OrbitVisualizer";
 import { useAppData } from "@/components/providers/AppDataProvider";
 import type { FriendType, FriendStatus } from "@/lib/types";
@@ -94,11 +95,16 @@ export default function OrbitPage() {
               onOpenUserAvatar={() => userInput.current?.click()}
             />
           </div>
-          <p className="fo-drag-hint">🖱️ Drag any planet to reposition and adjust closeness</p>
+          <p className="fo-drag-hint inline-flex flex-wrap items-center gap-2 justify-center md:justify-start">
+            <IconMouseDrag size={22} className="shrink-0 text-purple-400" aria-hidden />
+            <span>Drag any planet to reposition and adjust closeness</span>
+          </p>
         </div>
 
         <div className="fo-card">
-          <h3 className="mb-3.5 text-[15px] font-bold">✨ Add Friend</h3>
+          <TitleWithIcon icon={IconSparkles} className="mb-3.5">
+            Add Friend
+          </TitleWithIcon>
           <form className="flex flex-col gap-2.5" onSubmit={(e) => void onAddFriend(e)}>
             <label className="fo-form-label">
               Profile photo (optional)
@@ -150,9 +156,9 @@ export default function OrbitPage() {
             <label className="fo-form-label">
               Status
               <select name="status" className="fo-form-input">
-                <option value="normal">⭐ Normal</option>
-                <option value="toxic">☣️ Toxic</option>
-                <option value="cutoff">✂️ Cut Off</option>
+                <option value="normal">Normal</option>
+                <option value="toxic">Toxic</option>
+                <option value="cutoff">Cut off</option>
               </select>
             </label>
             <button type="submit" className="fo-btn fo-btn-primary mt-1">
