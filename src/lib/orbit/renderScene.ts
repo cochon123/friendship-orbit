@@ -20,6 +20,11 @@ export function polarToPoint(angleDeg: number, radius: number) {
   return { x: center.x + Math.cos(a) * radius, y: center.y + Math.sin(a) * radius };
 }
 
+/** Inner orbit / high closeness → 1; distant → 0. Drives halo strength. */
+function closenessGlow01(closeness: number): number {
+  return Math.max(0, Math.min(1, (closeness - 5) / 95));
+}
+
 export function svgPoint(e: MouseEvent | TouchEvent, svg: SVGSVGElement) {
   const pt = svg.createSVGPoint();
   const src =
@@ -91,6 +96,7 @@ function render3DPlanetNode(
   defs: Element,
 ) {
   const r = 21;
+  const glow = closenessGlow01(friend.closeness);
   const gradId = `planet3d-${friend.id}`;
   ensurePlanet3DGradient(defs, gradId, friend.color);
 
@@ -98,9 +104,20 @@ function render3DPlanetNode(
     ns("circle", {
       cx: String(point.x),
       cy: String(point.y),
-      r: String(r + 10),
+      r: String(r + 22 + glow * 44),
       fill: friend.color,
-      opacity: "0.18",
+      opacity: String(0.035 + glow * 0.22),
+      filter: "url(#blur-glow)",
+      "pointer-events": "none",
+    }),
+  );
+  g.append(
+    ns("circle", {
+      cx: String(point.x),
+      cy: String(point.y),
+      r: String(r + 7 + glow * 22),
+      fill: friend.color,
+      opacity: String(0.09 + glow * 0.4),
       filter: "url(#soft-glow)",
       "pointer-events": "none",
     }),
@@ -111,8 +128,9 @@ function render3DPlanetNode(
       cy: String(point.y),
       r: String(r),
       fill: `url(#${gradId})`,
-      stroke: "rgba(255,255,255,0.18)",
-      "stroke-width": "1",
+      stroke: `rgba(255,255,255,${0.14 + glow * 0.38})`,
+      "stroke-width": String(1 + glow * 2.75),
+      filter: glow > 0.35 ? "url(#soft-glow)" : "none",
     }),
   );
   g.append(
@@ -181,21 +199,23 @@ function renderBlackHoleNode(
   friend: Friend,
 ) {
   const r = 19;
+  const glow = closenessGlow01(friend.closeness);
   const isToxic = friend.status === "toxic";
   const c1 = isToxic ? "#ff5500" : "#7700ff";
   const c2 = isToxic ? "#ff0022" : "#0055ff";
   const c3 = isToxic ? "#ff9900" : "#00bbff";
   const dur1 = isToxic ? "3.2" : "4.8";
   const dur2 = isToxic ? "5.1" : "7.2";
-  const glowCol = isToxic ? "rgba(255,60,0,0.15)" : "rgba(110,0,255,0.14)";
+  const bhGlowRgb = isToxic ? "255,65,25" : "130,85,255";
   const lensCol = isToxic ? "rgba(255,140,60,0.75)" : "rgba(160,100,255,0.75)";
 
   g.append(
     ns("circle", {
       cx: String(point.x),
       cy: String(point.y),
-      r: String(r + 32),
-      fill: glowCol,
+      r: String(r + 26 + glow * 22),
+      fill: `rgb(${bhGlowRgb})`,
+      opacity: String(0.08 + glow * 0.38),
       filter: "url(#blur-glow)",
       "pointer-events": "none",
     }),
